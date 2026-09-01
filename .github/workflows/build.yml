@@ -1,0 +1,27 @@
+name: build
+
+on:
+  push:
+    
+permissions:   
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24.x
+
+    - name: Build
+      run: |
+        npm install
+        npm run build
+        gh release create nightly "dist/App 1.0.0.exe" --title "Nightly Build" --notes "build for windows" --prerelease --target "$GITHUB_SHA"
+      env:
+        GH_TOKEN: ${{ github.token }}
