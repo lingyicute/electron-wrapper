@@ -2,8 +2,15 @@ name: build
 
 on:
   push:
-    
-permissions:   
+  workflow_dispatch:
+    inputs:
+      custom_domain:
+        description: '自定义域名（例如：example.com；留空则使用默认的 best.92li.uk）'
+        required: false
+        default: ''
+        type: string
+
+permissions:
   contents: write
 
 jobs:
@@ -17,6 +24,62 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 24.x
+
+    # 仅在手动触发且填写了 custom_domain 时执行
+    - name: 自定义域名
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.custom_domain != '' }}
+      env:
+        CUSTOM_DOMAIN: ${{ inputs.custom_domain }}
+        DEFAULT_DOMAIN: best.92li.uk
+      run: |
+        set -euo pipefail
+
+        # 清洗输入：去掉空白、协议前缀、末尾斜杠
+        DOMAIN="$(printf '%s' "$CUSTOM_DOMAIN" | tr -d '[:space:]')"
+        DOMAIN="${DOMAIN#https://}"
+        DOMAIN="${DOMAIN#http://}"
+        DOMAIN="${DOMAIN%/}"
+
+        if [ -z "$DOMAIN" ]; then
+          echo "::notice::custom_domain 清洗后为空，跳过替换，继续使用 ${DEFAULT_DOMAIN}"
+          exit 0
+        fi
+
+        # 简单校验域名格式（字母、数字、点、短横线）
+        if ! printf '%s' "$DOMAIN" | grep -Eq '^[A-Za-z0-9.-]+$'; then
+          echo "::error::非法的域名：${DOMAIN}"
+          exit 1
+        fi
+
+        echo "将项目中的 ${DEFAULT_DOMAIN} 替换为 ${DOMAIN}"
+
+        # sed 正则中转义默认域名的点号
+        PATTERN="$(printf '%s' "$DEFAULT_DOMAIN" | sed 's/\./\\./g')"
+
+        # 找出所有包含默认域名的源文件并替换（排除 node_modules / .git / lock 文件）
+        FILES="$(grep -rl \
+          --exclude-dir=node_modules \
+          --exclude-dir=.git \
+          --exclude-dir=dist \
+          --exclude=package-lock.json \
+          "$PATTERN" . || true)"
+
+        if [ -z "$FILES" ]; then
+          echo "::warning::未找到包含 ${DEFAULT_DOMAIN} 的文件，无需替换"
+          exit 0
+        fi
+
+        printf '%s\n' "$FILES" | xargs -r sed -i "s|${PATTERN}|${DOMAIN}|g"
+
+        echo "----- 替换结果 -----"
+        grep -rn \
+          --exclude-dir=node_modules \
+          --exclude-dir=.git \
+          --exclude-dir=dist \
+          --exclude=package-lock.json \
+          "$DOMAIN" . || true
+
+        echo "::notice::已将 ${DEFAULT_DOMAIN} 替换为 ${DOMAIN}"
 
     - name: Build
       run: |
