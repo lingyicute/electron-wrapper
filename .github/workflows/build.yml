@@ -85,6 +85,13 @@ jobs:
       run: |
         npm install
         npm run build
-        gh release create nightly "dist/App 1.0.0.exe" --title "Nightly Build" --notes "build for windows" --prerelease --target "$GITHUB_SHA"
+
+    - name: Create Release
       env:
-        GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          gh release create "nightly-${{ github.run_number }}"  dist/*.exe \
+            --title "Nightly No.${{ github.run_number }}" \
+            --notes-file - << 'EOF'
+          自动构建 No.${{ github.run_number }}，内置域名 ${{ inputs.custom_domain }}
+          EOF
