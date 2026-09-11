@@ -1,0 +1,73 @@
+# 升级 Electron 的 workflow
+
+name: upgrade-electron
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '目标 Electron 版本（留空 = 最新版，或填写如 45.0.0）'
+        required: false
+        default: 'latest'
+        type: string
+  schedule:
+     - cron: '9 3 * * 1'
+
+permissions:
+  contents: write
+
+env:
+  PUSH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ env.PUSH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: 解析目标版本
+        id: resolve
+        run: |
+          set -euo pipefail
+          REQUESTED="${{ inputs.version }}"
+          EXACT="$(npm view "electron@${REQUESTED}" version 2>/dev/null | tail -n 1)"
+          if [ -z "${EXACT}" ]; then
+            echo "::error::找不到 Electron 版本：${REQUESTED}"
+            exit 1
+          fi
+          echo "exact=${EXACT}" >> "$GITHUB_OUTPUT"
+          echo "目标版本：Electron v${EXACT}"
+
+      - name: 升级 electron
+        run: |
+          set -euo pipefail
+          npm install --save-dev "electron@${{ steps.resolve.outputs.exact }}" \
+            --package-lock-only --ignore-scripts
+
+      - name: 提交并推送
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet; then
+            echo "::notice::Electron 已经是最新版本（v${{ steps.resolve.outputs.exact }}），无需提交。"
+            exit 0
+          fi
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+
+          git add package.json package-lock.json
+          git commit -m "chore(deps): upgrade electron to v${{ steps.resolve.outputs.exact }} [no ci]"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+          echo "::notice::已将 Electron v${{ steps.resolve.outputs.exact }} 推送回仓库。"
