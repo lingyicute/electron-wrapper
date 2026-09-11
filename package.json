@@ -9,7 +9,7 @@
   },
   "build": {
     "appId": "com.lyi.wrapper",
-    "productName": "App", 
+    "productName": "App",
     "directories": {
       "output": "dist"
     },
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/lingyicute/electron-wrapper#readme",
   "devDependencies": {
-    "electron": "^44.1.0",
+    "electron": "^44.3.0",
     "electron-builder": "^26.15.3"
   }
 }
