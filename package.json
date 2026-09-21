@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/lingyicute/electron-wrapper#readme",
   "devDependencies": {
-    "electron": "^44.3.0",
+    "electron": "^44.4.3",
     "electron-builder": "^26.15.3"
   }
 }
