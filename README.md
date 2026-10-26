@@ -2,7 +2,7 @@
 
 A minimal Electron wrapper that turns any website into a Windows portable `.exe` — no installer, no local toolchain required.
 
-#### ‎
+<br>
 
 ## 简介 / Introduction
 
@@ -10,7 +10,7 @@ A minimal Electron wrapper that turns any website into a Windows portable `.exe`
 
 A minimal Electron wrapper template that turns any website into a Windows portable `.exe`. It's a single-file `main.js` — just change one line of URL — and ships with a GitHub Actions workflow for one-click cloud builds with an optional custom domain.
 
-#### ‎
+<br> ‎
 
 ## 特性 / Features
 
@@ -18,13 +18,13 @@ A minimal Electron wrapper template that turns any website into a Windows portab
 - electron-builder 打包 Windows 便携版 `.exe`，免安装、开箱即用
 - GitHub Actions 自动构建：每次 push 自动打包；手动触发（Run workflow）可填 `custom_domain` 替换默认域名，产物自动发布到 Release
 
-#### ‎
+<br>
 
 - Single-file Electron app ([main.js](main.js)) — just change the `win.loadURL(...)` line
 - Windows portable `.exe` built with electron-builder, ready to run with no installation
 - GitHub Actions: auto-builds on every push; manual runs accept a `custom_domain` to replace the default domain, and artifacts are published to Releases automatically
 
-#### ‎
+<br> ‎
 
 ## 使用 / Usage
 
@@ -33,12 +33,12 @@ A minimal Electron wrapper template that turns any website into a Windows portab
 1. Fork 本仓库 → 进入 **Actions → build → Run workflow**，在 `custom_domain` 填入你的域名（留空则使用默认域名）
 2. 构建完成后，在 **Releases** 页面下载 `.exe`
 
-#### ‎
+<br> ‎
 
 1. Fork this repo, go to **Actions → build → Run workflow**, and enter your domain in `custom_domain` (leave empty to keep the default).
 2. When the build finishes, download the `.exe` from the **Releases** page.
 
-#### ‎
+<br> ‎
 
 ### 本地构建 / Local build
 
@@ -51,7 +51,7 @@ npm start        # 开发运行 / Run in development
 npm run build    # 打包便携版 exe，输出到 dist/ / Build the portable exe into dist/
 ```
 
-#### ‎
+<br>
 
 ## 🗂️ License
 
